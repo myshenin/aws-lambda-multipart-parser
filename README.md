@@ -54,3 +54,5 @@ All fields are represented in request body object as a key-value pair.
 All files are represented as an object with these fields:
   - __type__ - indicates that it's a file
   - __filename__ - name of uploaded file (the first one)
+  - __contentType__ - mime-type of file
+  - __content__ - content of file in form of Buffer (it's planned in future to give a choise between Buffer and text)
