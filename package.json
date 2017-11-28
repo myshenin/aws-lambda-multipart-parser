@@ -15,5 +15,15 @@
   "bugs": {
     "url": "https://github.com/myshenin/aws-lambda-multipart-parser/issues"
   },
-  "homepage": "https://github.com/myshenin/aws-lambda-multipart-parser#readme"
+  "homepage": "https://github.com/myshenin/aws-lambda-multipart-parser#readme",
+  "keywords": [
+    "aws",
+    "lambda",
+    "multipart",
+    "multipart/form-data",
+    "multipart/formdata",
+    "form-data",
+    "formdata",
+    "parser"
+  ]
 }
