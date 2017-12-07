@@ -25,5 +25,8 @@
     "form-data",
     "formdata",
     "parser"
-  ]
+  ],
+  "dependencies": {
+    "base-64": "^0.1.0"
+  }
 }
