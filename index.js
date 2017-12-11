@@ -1,7 +1,7 @@
 const base64 = require('base-64');
 
 module.exports.parse = (event) => {
-    const boundary = event.headers['Content-Type'].split('=')[1];
+    const boundary = (event.headers['Content-Type'] || event.headers['content-type']).split('=')[1];
     const response = (event.isBase64Encoded ? base64.decode(event.body) : event.body)
         .split(new RegExp(boundary))
         .filter(item => item.match(/Content-Disposition/))
