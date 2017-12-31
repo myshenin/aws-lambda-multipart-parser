@@ -35,7 +35,9 @@ Execute command `sls deploy` in AWS Lambda folder. (for more information look fo
 1. Import aws-lambda-multipart-parser with `npm install --save aws-lambda-multipart-parser` command.
 2. Require it in file `const multipart = require('aws-lambda-multipart-parser');`.
 3. Pass your event object to parse function like that `multipart.parse(event)`. Parse function will return object representing the request body.
-### 6. Request body object
+### 6. Use 'Content-Type':'multipart/forrm-data' in your requests.
+Notice this header is case sensitive.
+### 7. Response body object
 ```
 {
     "file": {
