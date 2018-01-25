@@ -9,9 +9,14 @@ const getCaseInsensitiveVal = (headerObj, key) => {
     return null;
 };
 /*
-* Throws error when the event does not have content-type and boundry.
+* Throws error: 
+*    * when the event does not have content-type and boundry.
+*    * when filenameRegex does not match with the file name in the event.    
 */
-module.exports.parse = (event) => {
+module.exports.parse = (event, filenameRegex) => {
+    var filenameRegex = filenameRegex != null? filenameRegex: "[\\w]+\\.[A-Za-z]{2,4}";
+    const fileRegex = new RegExp("filename=\""+ filenameRegex +"\"");
+    filenameRegex = new RegExp(filenameRegex);
     const contentType = getCaseInsensitiveVal(event.headers,'content-type');
     if (!contentType){
         throw new Error("no content type provided");
@@ -34,14 +39,14 @@ module.exports.parse = (event) => {
                     ] = {
                     type: 'file',
                     filename: item
-                        .match(/filename="[\w]+\.[A-Za-z]{2,4}"/)[0]
+                        .match(fileRegex)[0]
                         .split('=')[1]
-                        .match(/[\w]+\.[A-Za-z]{2,4}/)[0],
+                        .match(filenameRegex)[0],
                     contentType: item
                         .match(/Content-Type: .+\r\n\r\n/)[0]
                         .replace(/Content-Type: /, '')
                         .replace(/\r\n\r\n/, ''),
-                    content: Buffer.from(item
+                    content: new Buffer(item
                         .split(/\r\n\r\n/)[1]
                         .replace(/\r\n\r\n\r\n--/, '')),
                 };
