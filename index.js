@@ -25,7 +25,7 @@ module.exports.parse = (event) => {
                         .match(/Content-Type: .+\r\n\r\n/)[0]
                         .replace(/Content-Type: /, '')
                         .replace(/\r\n\r\n/, ''),
-                    content: Buffer.from(item
+                    content: new Buffer(item
                         .split(/\r\n\r\n/)[1]
                         .replace(/\r\n\r\n\r\n--/, '')),
                 };
