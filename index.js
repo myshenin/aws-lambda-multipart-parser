@@ -1,7 +1,25 @@
 const base64 = require('base-64');
 
+const getCaseInsensitiveVal = (headerObj, key) => {
+    for (keyName in headerObj){
+        if (keyName.toLocaleLowerCase() === key.toLocaleLowerCase()) {
+            return headerObj[keyName];
+        }
+    }
+    return null;
+};
+/*
+* Throws error when the event does not have content-type and boundry.
+*/
 module.exports.parse = (event) => {
-    const boundary = event.headers['Content-Type'].split('=')[1];
+    const contentType = getCaseInsensitiveVal(event.headers,'content-type');
+    if (!contentType){
+        throw new Error("no content type provided");
+    }
+    if(contentType.indexOf("boundary") === -1){
+        throw new Error("Content type does not contain boundary");
+    }
+    const boundary = contentType.split('=')[1];
     const response = (event.isBase64Encoded ? base64.decode(event.body) : event.body)
         .split(new RegExp(boundary))
         .filter(item => item.match(/Content-Disposition/))
