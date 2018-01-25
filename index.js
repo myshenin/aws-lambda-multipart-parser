@@ -1,7 +1,9 @@
 const base64 = require('base-64');
 
 module.exports.parse = (event) => {
-    const boundary = event.headers['Content-Type'].split('=')[1];
+    const boundary = event.headers['Content-Type']
+	? event.headers['Content-Type'].split('=')[1]
+	: event.headers['content-type'].split('=')[1];
     const response = (event.isBase64Encoded ? base64.decode(event.body) : event.body)
         .split(new RegExp(boundary))
         .filter(item => item.match(/Content-Disposition/))
@@ -16,9 +18,9 @@ module.exports.parse = (event) => {
                     ] = {
                     type: 'file',
                     filename: item
-                        .match(/filename="[\w]+\.[A-Za-z]{2,4}"/)[0]
+                        .match(/filename="[\w-\.]+"/)[0]
                         .split('=')[1]
-                        .match(/[\w]+\.[A-Za-z]{2,4}/)[0],
+                        .match(/[\w-\.]+/)[0],
                     contentType: item
                         .match(/Content-Type: .+\r\n\r\n/)[0]
                         .replace(/Content-Type: /, '')
