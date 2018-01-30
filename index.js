@@ -1,10 +1,16 @@
 const base64 = require('base-64');
 
-module.exports.parse = (event) => {
-    const boundary = event.headers['Content-Type']
-	? event.headers['Content-Type'].split('=')[1]
-	: event.headers['content-type'].split('=')[1];
-    const response = (event.isBase64Encoded ? base64.decode(event.body) : event.body)
+Object.prototype.getValueIgnoringKeyCase = function(lookedKey) {
+    return Object.keys(this)
+        .map(presentKey => presentKey.toLowerCase() === lookedKey.toLowerCase() ? this[presentKey] : null)
+        .filter(item => item)[0];
+};
+
+module.exports.parse = (event, spotText) => {
+    const boundary = event.headers
+        .getValueIgnoringKeyCase('content-type')
+        .split('=')[1];
+    const body = (event.isBase64Encoded ? base64.decode(event.body) : event.body)
         .split(new RegExp(boundary))
         .filter(item => item.match(/Content-Disposition/))
         .map((item) => {
@@ -25,7 +31,14 @@ module.exports.parse = (event) => {
                         .match(/Content-Type: .+\r\n\r\n/)[0]
                         .replace(/Content-Type: /, '')
                         .replace(/\r\n\r\n/, ''),
-                    content: new Buffer(item
+                    content: (spotText && item
+                        .match(/Content-Type: .+\r\n\r\n/)[0]
+                        .replace(/Content-Type: /, '')
+                        .replace(/\r\n\r\n/, '')
+                            .match(/text/)
+                    )? item
+                        .split(/\r\n\r\n/)[1]
+                        .replace(/\r\n\r\n\r\n--/, ''): new Buffer(item
                         .split(/\r\n\r\n/)[1]
                         .replace(/\r\n\r\n\r\n--/, '')),
                 };
@@ -43,5 +56,5 @@ module.exports.parse = (event) => {
             return result;
         })
         .reduce((accumulator, current) => Object.assign(accumulator, current), {});
-    return response;
+    return body;
 };
