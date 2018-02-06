@@ -1,9 +1,7 @@
 const base64 = require("base-64");
 
-module.exports.getValueIgnoringKeyCase = function getValueIgnoringKeyCase(
-  lookedObj,
-  lookedKey
-) {
+//
+function getValueIgnoringKeyCase(lookedObj, lookedKey) {
   return Object.keys(lookedObj)
     .map(
       presentKey =>
@@ -12,8 +10,11 @@ module.exports.getValueIgnoringKeyCase = function getValueIgnoringKeyCase(
           : null
     )
     .filter(item => item)[0];
-};
+}
+//
+module.exports.getValueIgnoringKeyCase = getValueIgnoringKeyCase;
 
+//
 module.exports.parse = (event, spotText) => {
   const boundary = getValueIgnoringKeyCase(event.headers, "content-type").split(
     "="
