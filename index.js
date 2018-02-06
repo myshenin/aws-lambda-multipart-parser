@@ -1,6 +1,9 @@
 const base64 = require("base-64");
 
-module.exports.getValueIgnoringKeyCase = function(lookedObj, lookedKey) {
+module.exports.getValueIgnoringKeyCase = function getValueIgnoringKeyCase(
+  lookedObj,
+  lookedKey
+) {
   return Object.keys(lookedObj)
     .map(
       presentKey =>
