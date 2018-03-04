@@ -7,7 +7,7 @@ function getValueIgnoringKeyCase(obj, lookedKey) {
 module.exports.parse = (event, spotText) => {
     const boundary = getValueIgnoringKeyCase(event.headers, 'Content-Type').split('=')[1];
     const body = (event.isBase64Encoded ? Buffer.from(event.body, 'base64').toString('binary') : event.body)
-        .split(new RegExp(boundary))
+        .split(boundary)
         .filter(item => item.match(/Content-Disposition/))
         .map((item) => {
             if (item.match(/filename/)) {
