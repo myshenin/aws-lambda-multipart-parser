@@ -1,6 +1,6 @@
 {
   "name": "aws-lambda-multipart-parser",
-  "version": "0.0.7",
+  "version": "0.1.2",
   "description": "Parser of multipart/form-data requests for AWS Lambda",
   "main": "index.js",
   "scripts": {
@@ -25,8 +25,5 @@
     "form-data",
     "formdata",
     "parser"
-  ],
-  "dependencies": {
-    "base-64": "^0.1.0"
-  }
+  ]
 }
