@@ -8,27 +8,27 @@ module.exports.parse = (event, spotText) => {
     const boundary = getValueIgnoringKeyCase(event.headers, 'Content-Type').split('=')[1];
     const body = (event.isBase64Encoded ? Buffer.from(event.body, 'base64').toString('binary') : event.body)
         .split(boundary)
-        .filter(item => item.match(/Content-Disposition/))
+        .filter(item => item.match(/Content-Disposition/i))
         .map((item) => {
             if (item.match(/filename/)) {
                 const result = {};
                 result[
                     item
-                        .match(/name="[a-zA-Z_]+([a-zA-Z0-9_]*)"/)[0]
+                        .match(/name="[a-zA-Z_]+([a-zA-Z0-9_]*)"/i)[0]
                         .split('=')[1]
                         .match(/[a-zA-Z_]+([a-zA-Z0-9_]*)/)[0]
                 ] = {
                         type: 'file',
                         filename: item
-                            .match(/filename="[\w-\. ]+"/)[0]
+                            .match(/filename="[\w-\. ]+"/i)[0]
                             .split('=')[1]
                             .match(/[\w-\.]+/)[0],
                         contentType: item
-                            .match(/Content-Type: .+\r\n\r\n/)[0]
+                            .match(/Content-Type: .+\r\n\r\n/i)[0]
                             .replace(/Content-Type: /, '')
                             .replace(/\r\n\r\n/, ''),
                         content: (spotText && item
-                            .match(/Content-Type: .+\r\n\r\n/)[0]
+                            .match(/Content-Type: .+\r\n\r\n/i)[0]
                             .replace(/Content-Type: /, '')
                             .replace(/\r\n\r\n/, '')
                             .match(/text/)
@@ -43,7 +43,7 @@ module.exports.parse = (event, spotText) => {
             const result = {};
             result[
                 item
-                    .match(/name="[a-zA-Z_]+([a-zA-Z0-9_]*)"/)[0]
+                    .match(/name="[a-zA-Z_]+([a-zA-Z0-9_]*)"/i)[0]
                     .split('=')[1]
                     .match(/[a-zA-Z_]+([a-zA-Z0-9_]*)/)[0]
             ] = item
