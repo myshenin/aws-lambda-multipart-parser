@@ -10,7 +10,7 @@ module.exports.parse = (event, spotText) => {
         .split(boundary)
         .filter(item => item.match(/Content-Disposition/i))
         .map((item) => {
-            if (item.match(/filename/)) {
+            if (item.match(/filename/i)) {
                 const result = {};
                 result[
                     item
