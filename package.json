@@ -1,6 +1,6 @@
 {
   "name": "aws-lambda-multipart-parser",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Parser of multipart/form-data requests for AWS Lambda",
   "main": "index.js",
   "scripts": {
@@ -25,5 +25,8 @@
     "form-data",
     "formdata",
     "parser"
-  ]
+  ],
+  "dependencies": {
+    "lodash.merge": "^4.6.1"
+  }
 }
