@@ -1,56 +1,61 @@
-function getValueIgnoringKeyCase(obj, lookedKey) {
-    return Object.keys(obj)
-        .map(presentKey => presentKey.toLowerCase() === lookedKey.toLowerCase() ? obj[presentKey] : null)
-        .filter(item => item)[0];
-}
+const prefixBoundary = '\r\n--';
+const delimData = '\r\n\r\n';
 
+/**
+ * Split gently
+ * @param {String} str
+ * @param {String} delim
+ * @return {Array<String>}
+ */
+const split = (str, delim) => [
+  str.substring(0, str.indexOf(delim)),
+  str.substring(str.indexOf(delim) + delim.length)];
+
+/**
+ * Get value of key, case insensitive
+ * @param {Object} obj
+ * @param {String} lookedKey
+ * @return {String}
+ */
+const getValueIgnoringKeyCase = (obj, lookedKey) => {
+  return obj[lookedKey.toLowerCase()] || obj[lookedKey.toLowerCase()] || '';
+};
+
+/**
+ * Parser
+ * @param {Object} event
+ * @param {String} spotText
+ * @return {*}
+ */
 module.exports.parse = (event, spotText) => {
-    const boundary = getValueIgnoringKeyCase(event.headers, 'Content-Type').split('=')[1];
-    const body = (event.isBase64Encoded ? Buffer.from(event.body, 'base64').toString('binary') : event.body)
-        .split(boundary)
-        .filter(item => item.match(/Content-Disposition/))
-        .map((item) => {
-            if (item.match(/filename/)) {
-                const result = {};
-                result[
-                    item
-                        .match(/name="[a-zA-Z_]+([a-zA-Z0-9_]*)"/)[0]
-                        .split('=')[1]
-                        .match(/[a-zA-Z_]+([a-zA-Z0-9_]*)/)[0]
-                ] = {
-                        type: 'file',
-                        filename: item
-                            .match(/filename="[\w-\. ]+"/)[0]
-                            .split('=')[1]
-                            .match(/[\w-\.]+/)[0],
-                        contentType: item
-                            .match(/Content-Type: .+\r\n\r\n/)[0]
-                            .replace(/Content-Type: /, '')
-                            .replace(/\r\n\r\n/, ''),
-                        content: (spotText && item
-                            .match(/Content-Type: .+\r\n\r\n/)[0]
-                            .replace(/Content-Type: /, '')
-                            .replace(/\r\n\r\n/, '')
-                            .match(/text/)
-                        ) ? item
-                            .split(/\r\n\r\n/)[1]
-                            .replace(/\r\n\r\n\r\n----/, '') : Buffer.from(item
-                                .split(/\r\n\r\n/)[1]
-                                .replace(/\r\n\r\n\r\n----/, ''), 'binary'),
-                    };
-                return result;
-            }
-            const result = {};
-            result[
-                item
-                    .match(/name="[a-zA-Z_]+([a-zA-Z0-9_]*)"/)[0]
-                    .split('=')[1]
-                    .match(/[a-zA-Z_]+([a-zA-Z0-9_]*)/)[0]
-            ] = item
-                .split(/\r\n\r\n/)[1]
-                .split(/\r\n--/)[0];
-            return result;
-        })
-        .reduce((accumulator, current) => Object.assign(accumulator, current), {});
-    return body;
+  const boundary = prefixBoundary + getValueIgnoringKeyCase(event.headers, 'Content-Type').split('=')[1];
+  return (event.isBase64Encoded ? Buffer.from(event.body, 'base64').toString('binary') : event.body)
+  .split(boundary)
+  .filter((item) => item.indexOf('Content-Disposition: form-data') !== -1)
+  .map((item) => {
+    const tmp = split(item, delimData);
+    const header = tmp[0];
+    let content = tmp[1];
+    const name = header.match(/name="([^"]+)"/)[1];
+    const result = {};
+    result[name] = content;
+
+    if (header.indexOf('filename') !== -1) {
+      const filename = header.match(/filename="([^"]+)"/)[1];
+      const contentType = header.match(/Content-Type: (.+)/)[1];
+
+      if (!(spotText && contentType.indexOf('text') !== -1)) { // replace content with binary
+        content = Buffer.from(content, 'binary');
+      }
+      result[name] = {
+        type: 'file',
+        filename: filename,
+        contentType: contentType,
+        content: content,
+        size: content.length
+      };
+    }
+    return result;
+  })
+  .reduce((accumulator, current) => Object.assign(accumulator, current), {});
 };
