@@ -20,9 +20,9 @@ module.exports.parse = (event, spotText) => {
                 ] = {
                         type: 'file',
                         filename: item
-                            .match(/filename="[\w-\. ]+"/)[0]
-                            .split('=')[1]
-                            .match(/[\w-\.]+/)[0],
+                        .match(/filename=".+"/)[0]
+                        .replace(/"/g,'')
+                        .split('=')[1],
                         contentType: item
                             .match(/Content-Type: .+\r\n\r\n/)[0]
                             .replace(/Content-Type: /, '')
