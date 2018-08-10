@@ -1,56 +1,31 @@
-function getValueIgnoringKeyCase(obj, lookedKey) {
-    return Object.keys(obj)
-        .map(presentKey => presentKey.toLowerCase() === lookedKey.toLowerCase() ? obj[presentKey] : null)
-        .filter(item => item)[0];
+function getValueIgnoringKeyCase(object, key) {
+    const foundKey = Object
+        .keys(object)
+        .find(currentKey => currentKey.toLocaleLowerCase() === key.toLowerCase());
+    return object[foundKey];
+}
+
+function getBoundary(event) {
+    return getValueIgnoringKeyCase(event.headers, 'Content-Type').split('=')[1];
 }
 
 module.exports.parse = (event, spotText) => {
-    const boundary = getValueIgnoringKeyCase(event.headers, 'Content-Type').split('=')[1];
-    const body = (event.isBase64Encoded ? Buffer.from(event.body, 'base64').toString('binary') : event.body)
+    const boundary = getBoundary(event);
+    const result = {};
+    event.body
         .split(boundary)
-        .filter(item => item.match(/Content-Disposition/))
-        .map((item) => {
-            if (item.match(/filename/)) {
-                const result = {};
-                result[
-                    item
-                        .match(/name="[a-zA-Z_]+([a-zA-Z0-9_]*)"/)[0]
-                        .split('=')[1]
-                        .match(/[a-zA-Z_]+([a-zA-Z0-9_]*)/)[0]
-                ] = {
-                        type: 'file',
-                        filename: item
-                            .match(/filename="[\w-\. ]+"/)[0]
-                            .split('=')[1]
-                            .match(/[\w-\.]+/)[0],
-                        contentType: item
-                            .match(/Content-Type: .+\r\n\r\n/)[0]
-                            .replace(/Content-Type: /, '')
-                            .replace(/\r\n\r\n/, ''),
-                        content: (spotText && item
-                            .match(/Content-Type: .+\r\n\r\n/)[0]
-                            .replace(/Content-Type: /, '')
-                            .replace(/\r\n\r\n/, '')
-                            .match(/text/)
-                        ) ? item
-                            .split(/\r\n\r\n/)[1]
-                            .replace(/\r\n\r\n\r\n----/, '') : Buffer.from(item
-                                .split(/\r\n\r\n/)[1]
-                                .replace(/\r\n\r\n\r\n----/, ''), 'binary'),
-                    };
-                return result;
+        .forEach(item => {
+            if (/filename=".+"/g.test(item)) {
+                result[item.match(/name=".+";/g)[0].slice(6, -2)] = {
+                    type: 'file',
+                    filename: item.match(/filename=".+"/g)[0].slice(10, -1),
+                    contentType: item.match(/Content-Type:\s.+/g)[0].slice(14),
+                    content: spotText? Buffer.from(item.slice(item.search(/Content-Type:\s.+/g) + item.match(/Content-Type:\s.+/g)[0].length + 4, -4), 'binary'):
+                        item.slice(item.search(/Content-Type:\s.+/g) + item.match(/Content-Type:\s.+/g)[0].length + 4, -4),
+                };
+            } else if (/name=".+"/g.test(item)){
+                result[item.match(/name=".+"/g)[0].slice(6, -1)] = item.slice(item.search(/name=".+"/g) + item.match(/name=".+"/g)[0].length + 4, -4);
             }
-            const result = {};
-            result[
-                item
-                    .match(/name="[a-zA-Z_]+([a-zA-Z0-9_]*)"/)[0]
-                    .split('=')[1]
-                    .match(/[a-zA-Z_]+([a-zA-Z0-9_]*)/)[0]
-            ] = item
-                .split(/\r\n\r\n/)[1]
-                .split(/\r\n--/)[0];
-            return result;
-        })
-        .reduce((accumulator, current) => Object.assign(accumulator, current), {});
-    return body;
+        });
+    return result;
 };
