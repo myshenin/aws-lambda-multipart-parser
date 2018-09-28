@@ -12,7 +12,11 @@ function getBoundary(event) {
 module.exports.parse = (event, spotText) => {
     const boundary = getBoundary(event);
     const result = {};
-    event.body
+    // Decode body from BASE64
+    const data = event.body;  
+    const buff = new Buffer(data, 'base64');  
+    const eventBody = buff.toString('ascii');
+    eventBody
         .split(boundary)
         .forEach(item => {
             if (/filename=".+"/g.test(item)) {
