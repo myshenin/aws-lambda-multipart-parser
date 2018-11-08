@@ -20,11 +20,11 @@ module.exports.parse = (event, spotText) => {
                     type: 'file',
                     filename: item.match(/filename=".+"/g)[0].slice(10, -1),
                     contentType: item.match(/Content-Type:\s.+/g)[0].slice(14),
-                    content: spotText? Buffer.from(item.slice(item.search(/Content-Type:\s.+/g) + item.match(/Content-Type:\s.+/g)[0].length + 4, -4), 'binary'):
-                        item.slice(item.search(/Content-Type:\s.+/g) + item.match(/Content-Type:\s.+/g)[0].length + 4, -4),
+                    content: spotText? Buffer.from(item.slice(item.search(/Content-Type:\s.+/g) + item.match(/Content-Type:\s.+/g)[0].length + 4, -2), 'binary'):
+                        item.slice(item.search(/Content-Type:\s.+/g) + item.match(/Content-Type:\s.+/g)[0].length + 4, -2),
                 };
             } else if (/name=".+"/g.test(item)){
-                result[item.match(/name=".+"/g)[0].slice(6, -1)] = item.slice(item.search(/name=".+"/g) + item.match(/name=".+"/g)[0].length + 4, -4);
+                result[item.match(/name=".+"/g)[0].slice(6, -1)] = item.slice(item.search(/name=".+"/g) + item.match(/name=".+"/g)[0].length + 4, -2);
             }
         });
     return result;
