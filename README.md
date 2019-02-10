@@ -69,3 +69,9 @@ All files are represented as an object with these fields:
   - __filename__ - name of uploaded file (the first one)
   - __contentType__ - mime-type of file
   - __content__ - content of file in form of Buffer (it's planned in future to give a choise between Buffer and text)
+  
+### 8. Issue with malformed media files uploaded to S3.
+Unfortunately, there is an issue with malformed media files uploaded to S3. Let me explain on example,
+I send an image, which is 50Kb. I get a buffer, which is 50Kb. That fact indicates buffer is formed well, 
+but some encoding issue happens with s3.upload and s3.putObject functions. If you have a solution or a hint, contact me
+myshenin.contact@gmail.com.
