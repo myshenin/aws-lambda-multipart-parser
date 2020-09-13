@@ -1,3 +1,6 @@
+# Warning
+The project is currently closed, and no further updates will be conducted.
+Please, consider using other libraries.
 # aws-lambda-multipart-parser
 ## Introduction
 Support of multipart/form-data requests is a relatively new feature for AWS Lambdas. 
