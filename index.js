@@ -9,10 +9,17 @@ function getBoundary(event) {
     return getValueIgnoringKeyCase(event.headers, 'Content-Type').split('=')[1];
 }
 
+function getBody(event) {
+    if (event.isBase64Encoded) {
+        return Buffer.from(event.body, 'base64').toString('binary');
+    }
+    return event.body;
+}
+
 module.exports.parse = (event, spotText) => {
     const boundary = getBoundary(event);
     const result = {};
-    event.body
+    getBody(event)
         .split(boundary)
         .forEach(item => {
             if (/filename=".+"/g.test(item)) {
