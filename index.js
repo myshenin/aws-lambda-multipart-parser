@@ -24,7 +24,17 @@ module.exports.parse = (event, spotText) => {
                         item.slice(item.search(/Content-Type:\s.+/g) + item.match(/Content-Type:\s.+/g)[0].length + 4, -4),
                 };
             } else if (/name=".+"/g.test(item)){
-                result[item.match(/name=".+"/g)[0].slice(6, -1)] = item.slice(item.search(/name=".+"/g) + item.match(/name=".+"/g)[0].length + 4, -4);
+                const fieldname = item.match(/name=".+"/g)[0].slice(6, -1);
+                const val = item.slice(item.search(/name=".+"/g) + item.match(/name=".+"/g)[0].length + 4, -4);              
+
+                if (fieldname in result) {
+                    if (!Array.isArray(result[fieldname])) {
+                        result[fieldname] = [result[fieldname]]
+                    }
+                    result[fieldname].push(val)
+                } else {
+                    result[fieldname] = val
+                }
             }
         });
     return result;
